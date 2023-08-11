@@ -1,10 +1,24 @@
 ﻿@page "/"
+@layout LandingPageLayout
 
-<PageTitle>Index</PageTitle>
+<PageTitle>AI Chef: Craft A Meal</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div class="page">
+    <div class="pagestyle">
+        <nav class="row align-item-center p-2">
+            <div class="column text-end me-3">
+                <a href="https://www.tjrobinson.me" target="_blank">About</a>
+            </div>
+        </nav>
+        <main class="landingPage">
+            <div class="text-center">
+                <img href="/createmeal" src="images/AiChefLogoLight.png" height="300"/>
+            </div>
+            <div class="text-center mt-5">
+                <a class="btn btn-success btn-lg">Get Cookin'</a>
+            </div>
+        </main>
+        <footer class="text-center p-2">&copy; A T.J. Robinson Project</footer>
+    </div>
+</div>
 
