@@ -10,7 +10,7 @@
         <h1>Create-O-Meal</h1>
         <EditForm EditContext="@editcontext">
             <div class="row gy-2">
-                <div class="col">
+                <div class="col-12">
                     <label class="form-label">Meal Time:</label>
                     <InputSelect @bind-Value="meal.mealtime" class="form-select">
                         <option value="Breakfast">Breakfast</option>
@@ -19,9 +19,41 @@
                         <option value="Dinner">Dinner</option>
                     </InputSelect>
                 </div>
-                <div class="col">
+                <div class="col-12">
                     <label class="form-label">Ingredient:</label>
                     <InputText placeholder="Add Ingredient" maxlength="30" @bind-Value="meal.ingridient" class="form-control mb-2"/>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-outline-success" @onclick="AddIngredient">Add</button>
+                    <button class="btn btn-outline-danger" @onclick="RemoveAll">Clear</button>
+                </div>
+                <div class="col-12 mt-3">
+                    <div class="table-responsive">
+                        <table class="table table-stripe">
+                            <thead>
+                                <tr>
+                                    <th>Ingredients</th>
+                                </tr>
+                            </thead>
+                           <tbody>
+                               @foreach (var item in ingredients)
+                                   {
+
+                                    <tr>
+                                        <td>
+                                            @item.Description
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <button class="btn btn-outline-danger" @onclick="() => RemoveIngredient(item.Id)"><i class="bi bi-trash-fill"></i></button>
+                                        </td>
+                                    </tr>
+                                   }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-success rounded">BAM!</button>
                 </div>
             </div>
         </EditForm>
@@ -32,6 +64,8 @@
 @code {
     private EditContext? editcontext;
 
+    private List<Ingredient> ingredients = new List<Ingredient>();
+
     private Meal meal = new();
 
     protected override void OnInitialized()
@@ -39,9 +73,34 @@
         editcontext = new(meal);
     }
 
-    private class Meal{
+    private class Meal {
         public string? mealtime { get; set; }
         public string? ingridient { get; set; }
     }
-}
 
+    private void AddIngredient()
+    {
+        if (!string.IsNullOrEmpty(meal.ingridient))
+        {
+            ingredients.Add(new Ingredient()
+            {
+                Id = Guid.NewGuid(),
+                Description = meal.ingridient
+            }
+            );
+        }
+
+        //clear text box
+        meal.ingridient = string.Empty;
+    }
+
+    private void RemoveAll()
+    {
+        ingredients.Clear();
+    }
+
+    private void RemoveIngredient(Guid id)
+    {
+        ingredients.Remove(ingredients.First(x => x.Id == id));
+    }
+}
