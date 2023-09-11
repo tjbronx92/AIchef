@@ -126,7 +126,7 @@ namespace AIchef.Server.Services
             }
         };
 
-        public async Task<List<Idea>> CreateRecipeIdea(string mealtime, List<string> ingredientList)
+        public async Task<List<Idea>> CreateRecipeIdeas(string mealtime, List<string> ingredientList)
         {
             string url = $"{_baseUrl}chat/completions";
             string systemPrompt = "You are a world-renwned chef. I will send you a list of ingredients and a meal time. You will respond with";
@@ -170,7 +170,7 @@ namespace AIchef.Server.Services
 
             //Get First Message Response
             ChatFunctionResponse? functionResponse = response.Choices?
-                                                    .FirstOrDefault(m => m.Message.FunctionCall is not null)?
+                                                    .FirstOrDefault(m => m.Message?.FunctionCall is not null)?
                                                     .Message?
                                                     .FunctionCall;
 

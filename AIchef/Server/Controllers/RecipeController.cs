@@ -35,10 +35,10 @@ namespace AIchef.Server.Controllers
             mealtime = "Breakfast";
         }
 
-        var ideas = await _openAIservice.CreateRecipe(mealtime, ingredients);
+        var ideas = await _openAIservice.CreateRecipeIdeas(mealtime, ingredients);
 
         return ideas;
-        return SampleData.RecipeIdeas;
+        //return SampleData.RecipeIdeas;
     }
     
 }

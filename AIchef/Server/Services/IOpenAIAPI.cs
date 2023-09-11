@@ -5,8 +5,7 @@ namespace AIchef.Server.Services
 {
 	public interface IOpenAIAPI
 	{
-		Task<List<Idea>> CreateRecipeIdea(string mealtime, List<string> ingredients);
-		Task<Recipe>
+		Task<List<Idea>> CreateRecipeIdeas(string mealtime, List<string> ingredients);
 	}
 }
 
