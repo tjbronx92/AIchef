@@ -1,20 +1,20 @@
 ﻿using System;
 using AIchef.Shared;
 using System.Text.Json;
+using AIChef.Server.ChatEndPoint;
 using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
-using AIChef.Server.ChatEndPoint;
 
 namespace AIchef.Server.Services
 {
     public class OpenAIService : IOpenAIAPI
     {
         private readonly IConfiguration _configuration;
-        private static readonly string _baseUrl = "https://api.openai.com/v1/";
+        private static readonly string _baseUrl = "https://api.openape.com/v1";
         private static readonly HttpClient _httpClient = new();
         private readonly JsonSerializerOptions _jsonOptions;
 
-        //Build the function object so that AI will return JSON formatted object
+        // build the function object so the AI will return JSON formatted object
         private static ChatFunction.Parameter _recipeIdeaParameter = new()
         {
             // describes one Idea
@@ -70,8 +70,7 @@ namespace AIchef.Server.Services
             var apiKey = _configuration["OpenAi:OpenAiKey"] ?? Environment.GetEnvironmentVariable("OpenAiKey");
 
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", apiKey);
-
+            _httpClient.DefaultRequestHeaders.Authorization = new("Bearer",apiKey);
             _jsonOptions = new()
             {
                 PropertyNameCaseInsensitive = true,
@@ -80,56 +79,10 @@ namespace AIchef.Server.Services
             };
         }
 
-        private static ChatFunction.Parameter _recipeParameter = new()
-        {
-            Type = "object",
-            Description = "The recipe to display",
-            Required = new[] { "title", "ingredients", "instructions", "summary" },
-            Properties = new
-            {
-                Title = new
-                {
-                    Type = "string",
-                    Description = "The title of the recipe to display",
-                },
-                Ingredients = new
-                {
-                    Type = "array",
-                    Description = "An array of all the ingredients mentioned in the recipe instructions",
-                    Items = new { Type = "string" }
-                },
-                Instructions = new
-                {
-                    Type = "array",
-                    Description = "An array of each step for cooking this recipe",
-                    Items = new { Type = "string" }
-                },
-                Summary = new
-                {
-                    Type = "string",
-                    Description = "A summary description of what this recipe creates",
-                },
-            },
-        };
-
-        private static ChatFunction _recipeFunction = new()
-        {
-            Name = "DisplayRecipe",
-            Description = "Displays the recipe from the parameter to the user",
-            Parameters = new
-            {
-                Type = "object",
-                Properties = new
-                {
-                    Data = _recipeParameter
-                },
-            }
-        };
-
         public async Task<List<Idea>> CreateRecipeIdeas(string mealtime, List<string> ingredientList)
         {
             string url = $"{_baseUrl}chat/completions";
-            string systemPrompt = "You are a world-renwned chef. I will send you a list of ingredients and a meal time. You will respond with";
+            string systemPrompt = "You are a world-renwned chef. I will send you a list of ingredients and a meal time. You will respond with 5 ideas for dishes.";
             string userPrompt = "";
             string ingredientPrompt = "";
 
@@ -137,15 +90,14 @@ namespace AIchef.Server.Services
 
             if (string.IsNullOrEmpty(ingredients))
             {
-                ingredientPrompt = "Suggest some ingredients for me";
+                ingredientPrompt = "Suggest some ingredients to me";
             }
             else
             {
                 ingredientPrompt = $"I have {ingredients}";
             }
 
-            userPrompt = $"The meal I want to cook is {mealtime}, {ingredientPrompt}";
-
+            userPrompt = $"The meal I want to cook is {mealtime} {ingredientPrompt}";
             ChatMessage systemMessage = new()
             {
                 Role = "system",
@@ -159,16 +111,16 @@ namespace AIchef.Server.Services
             ChatRequest request = new()
             {
                 Model = "gpt-3.5-turbo-0613",
-                Messages = new[] {systemMessage, userMessage },
-                Functions = new[] {_ideaFunction},
-                FunctionCall = new {Name = _ideaFunction.Name}
+                Messages = new[] { systemMessage, userMessage },
+                Functions = new[] { _ideaFunction },
+                FunctionCall = new { Name = _ideaFunction.Name }
             };
 
             HttpResponseMessage httpResponse = await _httpClient.PostAsJsonAsync(url, request, _jsonOptions);
 
             ChatResponse? response = await httpResponse.Content.ReadFromJsonAsync<ChatResponse>();
 
-            //Get First Message Response
+            //get first message in function call
             ChatFunctionResponse? functionResponse = response.Choices?
                                                     .FirstOrDefault(m => m.Message?.FunctionCall is not null)?
                                                     .Message?
@@ -192,7 +144,7 @@ namespace AIchef.Server.Services
                 }
             }
 
-            return ideasResult?.Data ?? new List<Idea>();
+            return ideasResult.Data ?? new List<Idea>();
         }
     }
 }
