@@ -15,30 +15,32 @@ namespace AIchef.Server.Controllers
     public class RecipeController : ControllerBase
     {
         private readonly IOpenAIAPI _openAIservice;
+
         public RecipeController(IOpenAIAPI openAIservice)
         {
             _openAIservice = openAIservice;
         }
 
-    }  
-    [HttpPost, Route("GetRecipeIdeas")]
-    public async Task<ActionResult<List<Idea>>> GetRecipeIdeas(RecipeParms recipeParms)
-    {
-        string mealtime = recipeParms.MealTime;
-        List<string> ingredients = recipeParms.Ingredients
-                                                .Where(x => !string.IsNullOrEmpty(x.Description))
-                                                .Select(x => x.Description!)
-                                                .ToList();
 
-        if (string.IsNullOrEmpty(mealtime))
+        [HttpPost, Route("GetRecipeIdeas")]
+        public async Task<ActionResult<List<Idea>>> GetRecipeIdeas(RecipeParms recipeParms)
         {
-            mealtime = "Breakfast";
+            string mealtime = recipeParms.MealTime;
+            List<string> ingredients = recipeParms.Ingredients
+                                                    .Where(x => !string.IsNullOrEmpty(x.Description))
+                                                    .Select(x => x.Description!)
+                                                    .ToList();
+
+            if (string.IsNullOrEmpty(mealtime))
+            {
+                mealtime = "Breakfast";
+            }
+
+            var ideas = await _openAIservice.CreateRecipeIdeas(mealtime, ingredients);
+
+            return ideas;
+            //return SampleData.RecipeIdeas;
         }
-
-        var ideas = await _openAIservice.CreateRecipeIdeas(mealtime, ingredients);
-
-        return ideas;
-        //return SampleData.RecipeIdeas;
     }
     
 }
