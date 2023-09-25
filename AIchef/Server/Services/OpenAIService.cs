@@ -10,7 +10,7 @@ namespace AIchef.Server.Services
     public class OpenAIService : IOpenAIAPI
     {
         private readonly IConfiguration _configuration;
-        private static readonly string _baseUrl = "https://api.openape.com/v1";
+        private static readonly string _baseUrl = "https://api.openai.com/v1/";
         private static readonly HttpClient _httpClient = new();
         private readonly JsonSerializerOptions _jsonOptions;
 
@@ -82,7 +82,7 @@ namespace AIchef.Server.Services
         public async Task<List<Idea>> CreateRecipeIdeas(string mealtime, List<string> ingredientList)
         {
             string url = $"{_baseUrl}chat/completions";
-            string systemPrompt = "You are a world-renwned chef. I will send you a list of ingredients and a meal time. You will respond with 5 ideas for dishes.";
+            string systemPrompt = "You are a world-renowned chef. I will send you a list of ingredients and a meal time. You will respond with 5 ideas for dishes.";
             string userPrompt = "";
             string ingredientPrompt = "";
 
@@ -97,7 +97,7 @@ namespace AIchef.Server.Services
                 ingredientPrompt = $"I have {ingredients}";
             }
 
-            userPrompt = $"The meal I want to cook is {mealtime} {ingredientPrompt}";
+            userPrompt = $"The meal I want to cook is {mealtime}. {ingredientPrompt}";
             ChatMessage systemMessage = new()
             {
                 Role = "system",
@@ -122,9 +122,10 @@ namespace AIchef.Server.Services
 
             //get first message in function call
             ChatFunctionResponse? functionResponse = response.Choices?
-                                                    .FirstOrDefault(m => m.Message?.FunctionCall is not null)?
-                                                    .Message?
-                                                    .FunctionCall;
+                                                             .FirstOrDefault(m => m.Message?
+                                                             .FunctionCall is not null)?
+                                                             .Message?
+                                                             .FunctionCall;
 
             Result<List<Idea>>? ideasResult = new();
 
@@ -144,7 +145,7 @@ namespace AIchef.Server.Services
                 }
             }
 
-            return ideasResult.Data ?? new List<Idea>();
+            return ideasResult?.Data ?? new List<Idea>();
         }
     }
 }
